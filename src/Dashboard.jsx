@@ -1,14 +1,15 @@
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import React, { useState, useEffect } from 'react';
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function Dashboard() {
   const navigate = useNavigate();
   
-  // 1. React Memory for the AI Data
+  // 1. React Memory for the AI Data & Loading State
   const [aiData, setAiData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState("Waking up AI Core (Free tier cold-start takes ~50s)...");
   const [error, setError] = useState('');
 
   // 2. The Auto-Trigger (Runs once when the page loads)
@@ -17,6 +18,22 @@ function Dashboard() {
   }, []);
 
   const fetchAIAnalysis = async () => {
+    // SETUP THE MESSAGES AND TIMER
+    const messages = [
+      "Waking up AI Core (Free tier cold-start takes ~50s)...",
+      "Establishing secure connection to Render vault...",
+      "Loading Scikit-Learn K-Means Clustering models...",
+      "Analyzing transaction history anomalies...",
+      "Generating insights via Gemini LLM..."
+    ];
+    let messageIndex = 0;
+    
+    // Cycle the text every 8 seconds while waiting
+    const loadingTimer = setInterval(() => {
+      messageIndex = (messageIndex + 1) % messages.length;
+      setLoadingMessage(messages[messageIndex]);
+    }, 8000); 
+
     try {
       // Grab the key from the vault
       const token = localStorage.getItem('jwt_token');
@@ -28,7 +45,6 @@ function Dashboard() {
       }
 
       // 🔥 FIRE THE PAYLOAD TO JAVA (WITH THE BADGE)
-      // NOTE: Update this URL to your exact Java endpoint for the analysis
       const response = await axios.get('http://localhost:8080/expenses/insights', {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -37,15 +53,12 @@ function Dashboard() {
 
       // Save the AI's response into React Memory
       setAiData(response.data);
-      setLoading(false);
-      setAiData(response.data);
-      console.log("🔥 FULL PIPELINE PAYLOAD:", response.data); // <-- ADD THIS LINE
-      setLoading(false);
+      console.log("🔥 FULL PIPELINE PAYLOAD:", response.data); 
 
     } catch (err) {
       console.error("Failed to fetch AI data:", err);
       
-      // 🔥 THE UPGRADE: Catch the 403 Security bounce
+      // Catch the 403 Security bounce
       if (err.response && err.response.status === 403) {
         console.warn("JWT Token Expired or Invalid. Kicking to Login.");
         localStorage.removeItem('jwt_token'); // Burn the dead token
@@ -53,11 +66,13 @@ function Dashboard() {
         return;
       }
 
-      // These lines were accidentally deleted!
       setError("Backend connection failed. Check server logs.");
+    } finally {
+      // ALWAYS clean up the interval when the request finishes
+      clearInterval(loadingTimer);
       setLoading(false);
-    } // <--- This closes the catch block
-  }; // <--- This closes the fetchAIAnalysis function
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('jwt_token'); 
@@ -85,10 +100,15 @@ function Dashboard() {
         </div>
       )}
 
-      {/* Loading State */}
+      {/* Dynamic Cold Start Loading State */}
       {loading && !error && (
-        <div className="text-center text-gray-400 text-xl animate-pulse mt-20">
-          Neural network analyzing behavior...
+        <div className="flex flex-col items-center justify-center h-64 space-y-6 mt-10">
+          {/* Tailwind CSS Spinning Circle */}
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-emerald-500"></div>
+          {/* Dynamic Pulsing Text */}
+          <p className="text-emerald-400/80 animate-pulse font-mono text-sm tracking-wide">
+            {loadingMessage}
+          </p>
         </div>
       )}
 
@@ -114,7 +134,7 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* 🔥 NEW: THE K-MEANS SCATTER PLOT 🔥 */}
+          {/* 🔥 THE K-MEANS SCATTER PLOT 🔥 */}
           {aiData.clusterData && aiData.clusterData.length > 0 && (
             <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg mt-6">
                <h3 className="text-gray-400 mb-4">Transaction Clustering (K-Means)</h3>

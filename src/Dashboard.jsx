@@ -45,7 +45,7 @@ function Dashboard() {
       }
 
       // 🔥 FIRE THE PAYLOAD TO JAVA (WITH THE BADGE)
-      const response = await axios.get('http://localhost:8080/expenses/insights', {
+      const response = await axios.get('https://finance-backend-java.onrender.com/expenses/insights', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

@@ -14,7 +14,7 @@ function Login() {
 
     try {
       // 1. Fire the payload at the Java server
-      const response = await axios.post('http://localhost:8080/users/login', {
+      const response = await axios.post('https://finance-backend-java.onrender.com', {
         email: email,
         password: password
       });

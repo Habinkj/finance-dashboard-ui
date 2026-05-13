@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useState } from 'react';
-import axios from 'axios';
+// import axios from 'axios'; // Temporarily unused
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -10,29 +10,34 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault(); 
-    setErrorMessage(''); // Clear old errors
+    setErrorMessage('');
 
+    // 🔥 TACTICAL BYPASS: KICK THE DOOR OPEN
+    console.log("🔥 AUTH BYPASSED. Forcing entry to dashboard...");
+    
+    // Inject a fake token so the dashboard doesn't panic if it checks for one
+    localStorage.setItem('jwt_token', 'temporary_development_bypass_token');
+    
+    // Immediately route to the dashboard
+    navigate('/dashboard');
+
+    /* =========================================
+    ORIGINAL SECURE CODE (DISABLED FOR NOW)
+    =========================================
     try {
-      // 1. Fire the payload at the Java server
-      const response = await axios.post('https://finance-backend-java.onrender.com', {
+      const response = await axios.post('https://finance-backend-java.onrender.com/api/auth/login', {
         email: email,
         password: password
       });
-
-      // 2. Java approved. Grab the JWT token it sent back.
       const token = response.data;
       console.log("🔥 BRIDGE CONNECTED. JWT TOKEN SECURED:", token);
-
-      // 3. Lock the token in the browser's vault
       localStorage.setItem('jwt_token', token);
-      
       navigate('/dashboard');
-
     } catch (err) {
-      // Java rejected the credentials or the server is offline
       console.error("Network Crash:", err);
       setErrorMessage("Access Denied. Invalid credentials or backend offline.");
     }
+    */
   };
 
   return (
@@ -72,7 +77,7 @@ function Login() {
           type="submit" 
           className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded transition-colors"
         >
-          Secure Login
+          Force Entry (Bypass)
         </button>
 
       </form>

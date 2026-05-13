@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useState } from 'react';
-// import axios from 'axios'; // Temporarily unused
+import axios from 'axios'; // 🔥 I ADDED THIS BACK FOR YOU
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -12,32 +12,28 @@ function Login() {
     e.preventDefault(); 
     setErrorMessage('');
 
-    // 🔥 TACTICAL BYPASS: KICK THE DOOR OPEN
-    console.log("🔥 AUTH BYPASSED. Forcing entry to dashboard...");
-    
-    // Inject a fake token so the dashboard doesn't panic if it checks for one
-    localStorage.setItem('jwt_token', 'temporary_development_bypass_token');
-    
-    // Immediately route to the dashboard
-    navigate('/dashboard');
-
-    /* =========================================
-    ORIGINAL SECURE CODE (DISABLED FOR NOW)
-    =========================================
     try {
+      // 1. Send the real login payload to the Java engine
       const response = await axios.post('https://finance-backend-java.onrender.com/api/auth/login', {
         email: email,
         password: password
       });
-      const token = response.data;
-      console.log("🔥 BRIDGE CONNECTED. JWT TOKEN SECURED:", token);
+
+      // 2. Grab the JWT token from the response
+      const token = response.data.token || response.data; 
+      
+      console.log("🔥 BRIDGE CONNECTED. JWT TOKEN SECURED.");
+
+      // 3. Lock the token in the browser's vault
       localStorage.setItem('jwt_token', token);
+      
+      // 4. Route to the dashboard
       navigate('/dashboard');
+
     } catch (err) {
       console.error("Network Crash:", err);
       setErrorMessage("Access Denied. Invalid credentials or backend offline.");
     }
-    */
   };
 
   return (
@@ -77,7 +73,7 @@ function Login() {
           type="submit" 
           className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded transition-colors"
         >
-          Force Entry (Bypass)
+          Secure Login {/* 🔥 Changed back to normal */}
         </button>
 
       </form>

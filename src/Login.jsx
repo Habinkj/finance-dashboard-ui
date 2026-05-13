@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useState } from 'react';
-import axios from 'axios'; // 🔥 I ADDED THIS BACK FOR YOU
+import axios from 'axios'; 
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -13,26 +13,38 @@ function Login() {
     setErrorMessage('');
 
     try {
-      // 1. Send the real login payload to the Java engine
-      const response = await axios.post('https://finance-backend-java.onrender.com/api/auth/login', {
+      // 🔥 FIX: Changed endpoint to /users/login to match your registration path
+      const response = await axios.post('https://finance-backend-java.onrender.com/users/login', {
         email: email,
         password: password
       });
 
-      // 2. Grab the JWT token from the response
+      // 1. Extract the token
+      // Handles both { "token": "..." } and raw string responses
       const token = response.data.token || response.data; 
+
+      if (!token || typeof token !== 'string') {
+          throw new Error("Invalid token received from server");
+      }
       
       console.log("🔥 BRIDGE CONNECTED. JWT TOKEN SECURED.");
 
-      // 3. Lock the token in the browser's vault
+      // 2. Lock the token in the browser's vault
       localStorage.setItem('jwt_token', token);
       
-      // 4. Route to the dashboard
+      // 3. Route to the dashboard
       navigate('/dashboard');
 
     } catch (err) {
       console.error("Network Crash:", err);
-      setErrorMessage("Access Denied. Invalid credentials or backend offline.");
+      
+      // Detailed error logging for debugging
+      if (err.response) {
+        console.log("Status:", err.response.status);
+        console.log("Data:", err.response.data);
+      }
+
+      setErrorMessage("Access Denied. Check credentials or backend URL.");
     }
   };
 
@@ -54,8 +66,10 @@ function Login() {
           <input 
             type="email" 
             className="w-full p-3 rounded bg-gray-700 text-white outline-none focus:ring-2 focus:ring-emerald-500"
+            placeholder="test@test.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
         </div>
 
@@ -64,16 +78,18 @@ function Login() {
           <input 
             type="password" 
             className="w-full p-3 rounded bg-gray-700 text-white outline-none focus:ring-2 focus:ring-emerald-500"
+            placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </div>
 
         <button 
           type="submit" 
-          className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded transition-colors"
+          className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded transition-colors shadow-lg"
         >
-          Secure Login {/* 🔥 Changed back to normal */}
+          Secure Login
         </button>
 
       </form>

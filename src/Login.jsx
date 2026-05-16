@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // 🔥 Added Link import
 import React, { useState } from 'react';
 import axios from 'axios'; 
 
@@ -13,14 +13,12 @@ function Login() {
     setErrorMessage('');
 
     try {
-      // 🔥 FIX: Changed endpoint to /users/login to match your registration path
       const response = await axios.post('https://finance-backend-java.onrender.com/users/login', {
         email: email,
         password: password
       });
 
       // 1. Extract the token
-      // Handles both { "token": "..." } and raw string responses
       const token = response.data.token || response.data; 
 
       if (!token || typeof token !== 'string') {
@@ -38,7 +36,6 @@ function Login() {
     } catch (err) {
       console.error("Network Crash:", err);
       
-      // Detailed error logging for debugging
       if (err.response) {
         console.log("Status:", err.response.status);
         console.log("Data:", err.response.data);
@@ -66,7 +63,7 @@ function Login() {
           <input 
             type="email" 
             className="w-full p-3 rounded bg-gray-700 text-white outline-none focus:ring-2 focus:ring-emerald-500"
-            placeholder="test@test.com"
+            placeholder="Enter your email" // 🔥 FIX: Professional placeholder
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -78,7 +75,7 @@ function Login() {
           <input 
             type="password" 
             className="w-full p-3 rounded bg-gray-700 text-white outline-none focus:ring-2 focus:ring-emerald-500"
-            placeholder="••••••••"
+            placeholder="Enter your password" // 🔥 FIX: Professional placeholder
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -91,6 +88,16 @@ function Login() {
         >
           Secure Login
         </button>
+
+        {/* 🔥 NEW: The Doorway for New Users */}
+        <div className="mt-6 text-center">
+          <p className="text-gray-400 text-sm">
+            Don't have an account?{' '}
+            <Link to="/register" className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors">
+              Register here
+            </Link>
+          </p>
+        </div>
 
       </form>
     </div>
